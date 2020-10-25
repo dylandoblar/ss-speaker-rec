@@ -181,6 +181,93 @@ class SpeakerNet(nn.Module):
         return (all_scores, all_labels, all_trials);
 
 
+    def evaluateFromListPase(self, listfilename, print_interval=100, test_path='', num_eval=10, eval_frames=None):
+        
+        self.eval();
+        
+        lines       = []
+        files       = []
+        feats       = {}
+        tstart      = time.time()
+
+        ## Read all lines
+        with open(listfilename) as listfile:
+            while True:
+                line = listfile.readline();
+                if (not line):
+                    break;
+
+                data = line.split();
+
+                ## Append random label if missing
+                if len(data) == 2: data = [random.randint(0,1)] + data
+
+                files.append(data[1])
+                files.append(data[2])
+                lines.append(line)
+
+        setfiles = list(set(files))
+        setfiles.sort()
+
+        ## Save all features to file
+        for idx, file in enumerate(setfiles):
+
+            # inp1 = torch.FloatTensor(loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)).cuda()
+            inp1 = torch.load(os.path.join(test_path, file)).cuda()
+
+            with torch.no_grad():
+
+                feat = self.torchfb(inp1)
+
+                ref_feat = self.__S__.forward(feat).detach().cpu()
+
+            # filename = '%06d.wav'%idx
+
+            feats[file]     = ref_feat
+
+            telapsed = time.time() - tstart
+
+            if idx % print_interval == 0:
+                sys.stdout.write("\rReading %d of %d: %.2f Hz, embedding size %d"%(idx,len(setfiles),idx/telapsed,ref_feat.size()[1]));
+
+        print('')
+        all_scores = [];
+        all_labels = [];
+        all_trials = [];
+        tstart = time.time()
+
+        ## Read files and compute all scores
+        for idx, line in enumerate(lines):
+
+            data = line.split();
+
+            ## Append random label if missing
+            if len(data) == 2: data = [random.randint(0,1)] + data
+
+            ref_feat = feats[data[1]].cuda()
+            com_feat = feats[data[2]].cuda()
+
+            if self.__L__.test_normalize:
+                ref_feat = F.normalize(ref_feat, p=2, dim=1)
+                com_feat = F.normalize(com_feat, p=2, dim=1)
+
+            dist = F.pairwise_distance(ref_feat.unsqueeze(-1), com_feat.unsqueeze(-1).transpose(0,2)).detach().cpu().numpy();
+
+            score = -1 * numpy.mean(dist);
+
+            all_scores.append(score);  
+            all_labels.append(int(data[0]));
+            all_trials.append(data[1]+" "+data[2])
+
+            if idx % print_interval == 0:
+                telapsed = time.time() - tstart
+                sys.stdout.write("\rComputing %d of %d: %.2f Hz"%(idx,len(lines),idx/telapsed));
+                sys.stdout.flush();
+
+        print('\n')
+
+        return (all_scores, all_labels, all_trials);
+
     ## ===== ===== ===== ===== ===== ===== ===== =====
     ## Save parameters
     ## ===== ===== ===== ===== ===== ===== ===== =====

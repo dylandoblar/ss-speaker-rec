@@ -1,4 +1,5 @@
 from scipy.io import wavfile
+import librosa
 import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +9,8 @@ import argparse
 
 
 def main(opts):
-    rate, wav = wavfile.read(opts.in_file)
+    # rate, wav = wavfile.read(opts.in_file)
+    wav, rate = librosa.core.load(opts.in_file, sr=None)
     vad = webrtcvad.Vad()
     vad.set_mode(opts.vad_mode)
     win_len = int(opts.win_len * rate + .5)

@@ -12,6 +12,7 @@ import time
 import math
 import glob
 from scipy.io import wavfile
+import librosa
 from queue import Queue
 from config import *
 from torch.utils.data import Dataset, DataLoader
@@ -20,6 +21,53 @@ from scipy import signal
 
 def worker_init_fn(worker_id):
     numpy.random.seed(numpy.random.get_state()[1][0] + worker_id)
+
+
+class PaseVoxCeleb(Dataset):
+    def __init__(self, dataset_file_name, num_frames, shuffle=True):
+        self.dataset_file_name = dataset_file_name
+        self.num_frames = num_frames
+        self.file_list = os.listdir(self.path)
+        self.shuffle = shuffle
+
+        ### Read Training Files...
+        with open(dataset_file_name) as dataset_file:
+            while True:
+                line = dataset_file.readline();
+                if not line:
+                    break;
+                
+                data = line.split();
+                filename = os.path.join(train_path,data[1]);
+                self.data_list.append(filename)
+
+    def __len__(self):
+        return len(self.file_list)
+
+    def __getitem__(self, idx):
+        if self.shuffle:
+            # select random speaker id
+            selected_spkr = random.sample(self.file_list, 1)[0]
+        else:
+            selected_spkr = self.file_list[idx]
+
+        # randomly sample 2 utterances from current speaker for contrastive training
+        path_to_utts = os.path.join(self.path, selected_spkr)
+        utter_list = os.listdir(path_to_utts)
+        selected_utters = random.sample(utter_list, 2)
+
+        sampled_clips = []
+        for utt in selected_utters:
+            utt_pt = torch.load(os.path.join(path_to_utts, utt))
+
+            # process 1.8s segments, each pase embedding covers .15s => 12 segments
+            utter_start = np.random.randint(0, utt_pt.shape[2]-12)
+            clip = utt_pt[:,:,utter_start:utter_start+12]
+            sampled_clips.append(clip)
+
+        sampled_clips = torch.cat(sampled_clips, dim=0)
+        return sampled_clips
+
 
 class wav_split(Dataset):
     def __init__(self, dataset_file_name, max_frames, train_path, musan_path, augment_anchor, augment_type, n_mels):
@@ -144,7 +192,8 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
     max_audio = max_frames * 160 + 240
 
     # Read wav file and convert to torch tensor
-    sample_rate, audio  = wavfile.read(filename)
+    # sample_rate, audio  = wavfile.read(filename)
+    audio, sample_rate = librosa.core.load(filename, sr=None)
 
     audiosize = audio.shape[0]
 
@@ -175,7 +224,8 @@ def loadWAVSplit(filename, max_frames):
     max_audio = max_frames * 160 + 240
 
     # Read wav file and convert to torch tensor
-    sample_rate, audio  = wavfile.read(filename)
+    # sample_rate, audio  = wavfile.read(filename)
+    audio, sample_rate = librosa.core.load(filename, sr=None)
 
     audiosize = audio.shape[0]
 
@@ -219,6 +269,31 @@ def get_data_loader(dataset_file_name, batch_size, max_frames, nDataLoaderThread
         worker_init_fn=worker_init_fn,
     )
     
+    return train_loader
 
+
+def get_pase_data_loader(data_path, num_frames, batch_size, nDataLoaderThread):
+
+    train_dataset = PaseVoxCeleb(data_path, num_frames)
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=nDataLoaderThread,
+        pin_memory=False,
+        drop_last=True,
+        worker_init_fn=worker_init_fn
+    )
 
     return train_loader
+
+
+
+
+
+
+
+
+
+
