@@ -51,7 +51,7 @@ if __name__ == "__main__":
             path_to_utters = os.path.join(path_to_speaker, video_id)
             utterances = os.listdir(path_to_utters)
             for j, utt in enumerate(utterances):
-                if int(utt[:-4]) < 100:
+                if int(utt[:-4]) < 50:
                     utter_path = os.path.join(path_to_utters, utt)
                     pase_reps = get_pase_representations(pase, utter_path)
                      
