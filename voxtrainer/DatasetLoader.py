@@ -122,7 +122,7 @@ class wav_split(Dataset):
 
             ## additive noise profile
             noisecat    = random.choice(self.noisetypes)
-            noisefile   = random.choice(self.noiselist[noisecat].copy())
+            #noisefile   = random.choice(self.noiselist[noisecat].copy())
             snr = [random.uniform(self.noisesnr[noisecat][0],self.noisesnr[noisecat][1])]
 
             if self.augment_type == 0 or (ii == 0 and not self.augment_anchor):
