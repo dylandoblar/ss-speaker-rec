@@ -11,6 +11,7 @@ import zipfile
 import datetime
 from tuneThreshold import tuneThresholdfromScore
 from SpeakerNet import SpeakerNet
+from SpeakerNetPase import SpeakerNetPase
 from DatasetLoader import get_data_loader, get_pase_data_loader
 
 parser = argparse.ArgumentParser(description = "SpeakerNet");
@@ -92,7 +93,10 @@ if not(os.path.exists(result_save_path)):
     os.makedirs(result_save_path)
 
 ## Load models
-s = SpeakerNet(**vars(args));
+if args.use_pase:
+    s = SpeakerNetPase(**vars(args))
+else:
+    s = SpeakerNet(**vars(args));
 
 it          = 1;
 prevloss    = float("inf");
