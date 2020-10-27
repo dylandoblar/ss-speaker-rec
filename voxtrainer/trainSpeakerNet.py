@@ -11,7 +11,7 @@ import zipfile
 import datetime
 from tuneThreshold import tuneThresholdfromScore
 from SpeakerNet import SpeakerNet
-from DatasetLoader import get_data_loader
+from DatasetLoader import get_data_loader, get_pase_data_loader
 
 parser = argparse.ArgumentParser(description = "SpeakerNet");
 
@@ -54,6 +54,10 @@ parser.add_argument('--log_input',      type=bool,  default=False,  help='Log in
 parser.add_argument('--model',          type=str,   default="",     help='Name of model definition');
 parser.add_argument('--encoder_type',   type=str,   default="SAP",  help='Type of encoder');
 parser.add_argument('--nOut',           type=int,   default=512,    help='Embedding size in the last FC layer');
+
+## Args for using PASE features
+parser.add_argument('--use_pase',       type=bool,  default=False,  help='Whether training with PASE features or not');
+parser.add_argument('--pase_dim',       type=int,   default=256,    help='Dimension of PASE features')
 
 ## For test only
 parser.add_argument('--eval', dest='eval', action='store_true', help='Eval only')
@@ -150,7 +154,10 @@ f.close()
 scorefile = open(result_save_path+"/scores.txt", "a+");
 
 ## Initialise data loader
-trainLoader = get_data_loader(args.train_list, **vars(args));
+if args.use_pase:
+    trainLoader = get_pase_data_loader(args.train_list, args.max_frames, args.batch_size, args.nDataLoaderThread)
+else:
+    trainLoader = get_data_loader(args.train_list, **vars(args));
 
 while(1):   
 

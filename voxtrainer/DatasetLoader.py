@@ -24,10 +24,10 @@ def worker_init_fn(worker_id):
 
 
 class PaseVoxCeleb(Dataset):
-    def __init__(self, dataset_file_name, num_frames, shuffle=True):
+    def __init__(self, dataset_file_name, max_frames, shuffle=True):
         self.dataset_file_name = dataset_file_name
-        self.num_frames = num_frames
-        self.file_list = os.listdir(self.path)
+        self.max_frames = max_frames
+        self.data_list = []
         self.shuffle = shuffle
 
         ### Read Training Files...
@@ -42,7 +42,7 @@ class PaseVoxCeleb(Dataset):
                 self.data_list.append(filename)
 
     def __len__(self):
-        return len(self.file_list)
+        return len(self.data_list)
 
     def __getitem__(self, idx):
         if self.shuffle:
@@ -60,9 +60,9 @@ class PaseVoxCeleb(Dataset):
         for utt in selected_utters:
             utt_pt = torch.load(os.path.join(path_to_utts, utt))
 
-            # process 1.8s segments, each pase embedding covers .15s => 12 segments
-            utter_start = np.random.randint(0, utt_pt.shape[2]-12)
-            clip = utt_pt[:,:,utter_start:utter_start+12]
+            # process 1.8s segments, each pase embedding emulates sliding window of 10ms => 180 segments
+            utter_start = np.random.randint(0, utt_pt.shape[2]-self.max_frames)
+            clip = utt_pt[:,:,utter_start:utter_start+self.max_frames]
             sampled_clips.append(clip)
 
         sampled_clips = torch.cat(sampled_clips, dim=0)
@@ -272,9 +272,9 @@ def get_data_loader(dataset_file_name, batch_size, max_frames, nDataLoaderThread
     return train_loader
 
 
-def get_pase_data_loader(data_path, num_frames, batch_size, nDataLoaderThread):
+def get_pase_data_loader(dataset_file_name, max_frames, batch_size, nDataLoaderThread):
 
-    train_dataset = PaseVoxCeleb(data_path, num_frames)
+    train_dataset = PaseVoxCeleb(dataset_file_name, max_frames)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
