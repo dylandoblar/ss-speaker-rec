@@ -36,8 +36,8 @@ if __name__ == "__main__":
         if i % 100 == 0:
             print(f"processing {i}th speaker...")
 
-        if os.path.exists(os.path.join(save_path, speaker_id)):
-            continue
+        # if os.path.exists(os.path.join(save_path, speaker_id)):
+        #     continue
         
         os.makedirs(os.path.join(save_path, speaker_id), exist_ok=True)
         path_to_speaker = os.path.join(audio_path, speaker_id)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             path_to_utters = os.path.join(path_to_speaker, video_id)
             utterances = os.listdir(path_to_utters)
             for j, utt in enumerate(utterances):
-                if int(utt[:-4]) < 50:
+                if int(utt[:-4]) == 50:
                     utter_path = os.path.join(path_to_utters, utt)
                     pase_reps = get_pase_representations(pase, utter_path)
                      

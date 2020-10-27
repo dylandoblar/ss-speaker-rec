@@ -12,7 +12,7 @@ from tuneThreshold import tuneThresholdfromScore
 class SpeakerNetPase(nn.Module):
 
     def __init__(self, model, optimizer, scheduler, trainfunc, **kwargs):
-        super(SpeakerNet, self).__init__();
+        super(SpeakerNetPase, self).__init__();
 
         SpeakerNetModel = importlib.import_module('models.'+model).__getattribute__('MainModel')
         self.__S__ = SpeakerNetModel(**kwargs).cuda();
@@ -124,9 +124,9 @@ class SpeakerNetPase(nn.Module):
         for idx, file in enumerate(setfiles):
 
             # inp1 = torch.FloatTensor(loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)).cuda()
-            start_idx = random.randint(0, inp1.shape[2]-eval_frames)
-            inp1 = torch.load(os.path.join(test_path, file))
-            inp1 = inp1[:,:,start_idx:start_idx+eval_frames].cuda()
+            feat = torch.load(os.path.join(test_path, file))
+            start_idx = random.randint(0, feat.shape[2]-eval_frames)
+            feat = feat[:,:,start_idx:start_idx+eval_frames].cuda()
 
             with torch.no_grad():
                 ref_feat = self.__S__.forward(feat).detach().cpu()

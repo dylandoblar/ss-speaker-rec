@@ -159,7 +159,7 @@ scorefile = open(result_save_path+"/scores.txt", "a+");
 
 ## Initialise data loader
 if args.use_pase:
-    trainLoader = get_pase_data_loader(args.train_list, args.max_frames, args.batch_size, args.nDataLoaderThread)
+    trainLoader = get_pase_data_loader(args.train_list, args.max_frames, args.batch_size, args.nDataLoaderThread, args.train_path)
 else:
     trainLoader = get_data_loader(args.train_list, **vars(args));
 

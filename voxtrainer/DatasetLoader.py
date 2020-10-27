@@ -24,11 +24,12 @@ def worker_init_fn(worker_id):
 
 
 class PaseVoxCeleb(Dataset):
-    def __init__(self, dataset_file_name, max_frames, shuffle=True):
+    def __init__(self, dataset_file_name, max_frames, train_path):
         self.dataset_file_name = dataset_file_name
         self.max_frames = max_frames
-        self.data_list = []
-        self.shuffle = shuffle
+        self.train_path = train_path
+        self.data_dict = {}
+        self.data_points = 0
 
         ### Read Training Files...
         with open(dataset_file_name) as dataset_file:
@@ -38,30 +39,31 @@ class PaseVoxCeleb(Dataset):
                     break;
                 
                 data = line.split();
-                filename = os.path.join(train_path,data[1]);
-                self.data_list.append(filename)
+                speaker_id = data[0]
+                filename = os.path.join(self.train_path, data[1]);
+                try:
+                    self.data_dict[speaker_id].append(filename)
+                except KeyError:
+                    self.data_dict[speaker_id] = [filename]
+                self.data_points += 1
 
     def __len__(self):
-        return len(self.data_list)
+        return self.data_points
 
     def __getitem__(self, idx):
-        if self.shuffle:
-            # select random speaker id
-            selected_spkr = random.sample(self.file_list, 1)[0]
-        else:
-            selected_spkr = self.file_list[idx]
+        # select random speaker id
+        selected_spkr = random.sample(self.data_dict.keys(), 1)[0]
 
         # randomly sample 2 utterances from current speaker for contrastive training
-        path_to_utts = os.path.join(self.path, selected_spkr)
-        utter_list = os.listdir(path_to_utts)
-        selected_utters = random.sample(utter_list, 2)
+        selected_utters = random.sample(self.data_dict[selected_spkr], 2)
 
         sampled_clips = []
         for utt in selected_utters:
-            utt_pt = torch.load(os.path.join(path_to_utts, utt))
+            utt_pt = torch.load(utt, map_location=torch.device('cpu'))
+            utt_pt.requires_grad = False
 
             # process 1.8s segments, each pase embedding emulates sliding window of 10ms => 180 segments
-            utter_start = np.random.randint(0, utt_pt.shape[2]-self.max_frames)
+            utter_start = random.randint(0, utt_pt.shape[2]-self.max_frames)
             clip = utt_pt[:,:,utter_start:utter_start+self.max_frames]
             sampled_clips.append(clip)
 
@@ -272,16 +274,16 @@ def get_data_loader(dataset_file_name, batch_size, max_frames, nDataLoaderThread
     return train_loader
 
 
-def get_pase_data_loader(dataset_file_name, max_frames, batch_size, nDataLoaderThread):
+def get_pase_data_loader(dataset_file_name, max_frames, batch_size, nDataLoaderThread, train_path):
 
-    train_dataset = PaseVoxCeleb(dataset_file_name, max_frames)
+    train_dataset = PaseVoxCeleb(dataset_file_name, max_frames, train_path)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=nDataLoaderThread,
-        pin_memory=False,
+        pin_memory=True,
         drop_last=True,
         worker_init_fn=worker_init_fn
     )
