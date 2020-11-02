@@ -44,7 +44,7 @@ def format_frontend_output(y, data_fmt, mode):
 
 def build_rnn_block(in_size, rnn_size, rnn_layers, rnn_type,
                     bidirectional=True,
-                    dropout=0, use_cuda=True):
+                    dropout=0, use_cuda=False):
     if (rnn_type.lower() == 'qrnn') and QRNN is not None:
         if bidirectional:
             print('WARNING: QRNN ignores bidirectional flag')
