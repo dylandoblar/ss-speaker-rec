@@ -124,14 +124,14 @@ class SpeakerNetPase(nn.Module):
         for idx, file in enumerate(setfiles):
 
             # inp1 = torch.FloatTensor(loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)).cuda()
-            feat = torch.load(os.path.join(test_path, file))
+            feat = torch.tensor(numpy.load(os.path.join(test_path, file)))
             start_idx = random.randint(0, feat.shape[2]-eval_frames)
             feat = feat[:,:,start_idx:start_idx+eval_frames].cuda()
 
             with torch.no_grad():
                 ref_feat = self.__S__.forward(feat).detach().cpu()
 
-            filename = '%06d.pt'%idx
+            filename = '%06d.npy'%idx
 
             feats[file]     = ref_feat
 

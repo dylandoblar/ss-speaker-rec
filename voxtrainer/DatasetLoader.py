@@ -18,6 +18,7 @@ from config import *
 from torch.utils.data import Dataset, DataLoader
 from torchaudio import transforms
 from scipy import signal
+import numpy as np
 
 def worker_init_fn(worker_id):
     numpy.random.seed(numpy.random.get_state()[1][0] + worker_id)
@@ -59,15 +60,14 @@ class PaseVoxCeleb(Dataset):
 
         sampled_clips = []
         for utt in selected_utters:
-            utt_pt = torch.load(utt, map_location=torch.device('cpu'))
-            utt_pt.requires_grad = False
+            utt_pt = np.load(utt)
 
             # process 1.8s segments, each pase embedding emulates sliding window of 10ms => 180 segments
             utter_start = random.randint(0, utt_pt.shape[2]-self.max_frames)
             clip = utt_pt[:,:,utter_start:utter_start+self.max_frames]
             sampled_clips.append(clip)
 
-        sampled_clips = torch.cat(sampled_clips, dim=0)
+        sampled_clips = torch.tensor(np.concatenate(sampled_clips, axis=0))
         return sampled_clips
 
 

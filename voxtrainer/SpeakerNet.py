@@ -38,9 +38,9 @@ class SpeakerNet(nn.Module):
     def train_network(self, loader):
 
         self.train();
-
+        
         stepsize = loader.batch_size;
-
+        
         counter = 0;
         index   = 0;
         loss    = 0;
@@ -48,11 +48,11 @@ class SpeakerNet(nn.Module):
 
         criterion   = torch.nn.CrossEntropyLoss()
         conf_labels = torch.LongTensor([1]*stepsize+[0]*stepsize).cuda()
-
+        
         tstart = time.time()
         
         for data in loader:
-
+            
             self.zero_grad();
 
             data = data.transpose(0,1)

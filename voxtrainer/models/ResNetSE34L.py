@@ -76,11 +76,10 @@ class ResNetSE(nn.Module):
         return out
 
     def forward(self, x):
-
         x = x + 1e-6
-        if self.log_input: x = x.log()
+        #if self.log_input: x = x.log()
         x = self.instancenorm(x).unsqueeze(1).detach()
-
+        
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -91,7 +90,7 @@ class ResNetSE(nn.Module):
         x = self.layer4(x)
         
         x = torch.mean(x, dim=2, keepdim=True)
-
+        
         if self.encoder_type == "SAP":
             x = x.permute(0, 2, 1, 3)
             x = x.squeeze(dim=1).permute(0, 2, 1)  # batch * L * D
