@@ -7,6 +7,7 @@ import csv
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 
 def gen_plots(scores_fname, out_dir, exp_name):
@@ -30,6 +31,9 @@ def gen_plots(scores_fname, out_dir, exp_name):
     os.makedirs(out_dir, exist_ok=True)
 
     # training loss
+    # only integers on x-axis (epochs)
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.plot(epoch, train_loss, label='Training Loss')
     plt.title(f'{exp_name}Training Loss')
     plt.xlabel('Epochs')
@@ -45,6 +49,9 @@ def gen_plots(scores_fname, out_dir, exp_name):
 
     # validation EER
     min_val_eer = min(val_eer)
+    # only integers on x-axis (epochs)
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.plot(epoch, val_eer, color='green', label='Validation EER')
     plt.hlines(min_val_eer, min(epoch), max(epoch), colors='red', linestyles='dashed',
                label=f'Minimum Validation EER: {round(min_val_eer, 2)}%')
