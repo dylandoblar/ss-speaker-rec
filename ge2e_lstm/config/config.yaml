@@ -1,0 +1,28 @@
+---
+data:
+    train_path: '/mnt/disks/data/logmel_fbank/voxceleb1'
+    test_path:  '/mnt/disks/data/logmel_fbank/voxceleb1'
+    fs: 16000          # sampling rate
+    nfft: 512          # number of ffts for mel spectrogram preprocess
+    window: 0.025      # 25ms
+    hop: 0.01          # 10ms
+    nmels: 40          # Number of mel energies
+---   
+model:
+    hidden: 768        # number of LSTM hidden layer units
+    num_layer: 3       # number of LSTM layers
+    proj: 256          # embedding size
+    model_path: './checkpoints/checkpoint.model'  # model path for testing, inference, or resuming training
+---
+train:
+    N : 64               # batch size (number of speakers per batch)
+    M : 10               # number of utterances per speaker
+    num_frames: 36       # number of STFT frames to use per d-vector
+    num_workers: 4       # number of workers for dataloader
+    lr: 0.001            # learning rate
+    lr_step: 20          # step size for learning rate scheduler
+    epochs: 500          # maximum number of training epochs
+    output_interval: 25  # batch output interval every epoch
+    checkpoint_interval: 10  # interval for saving model parameters
+    checkpoint_dir: './checkpoints'
+    restore: !!bool "true"  # resume training from previous model path
