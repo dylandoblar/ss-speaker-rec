@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # get list of speaker ids from VoxCeleb
     speaker_ids = os.listdir(audio_path)
 
-    # get PASE representations for each speaker
+    # get PASE representations for utterances from each speaker
     for speaker_id in tqdm(speaker_ids):
         os.makedirs(os.path.join(save_path, speaker_id), exist_ok=True)
         path_to_speaker = os.path.join(audio_path, speaker_id)
@@ -46,10 +46,10 @@ if __name__ == "__main__":
                 save_file_path = os.path.join(save_path, speaker_id, save_filename)
                 
                 utter_path = os.path.join(path_to_utters, utt)
-                utt_idx += 1
-                pase_reps = get_pase_representations(pase, utter_path)
-                
+                pase_reps = get_pase_representations(pase, utter_path)                
                 np.save(save_file_path, pase_reps)
+                
+                utt_idx += 1
 
 
 
