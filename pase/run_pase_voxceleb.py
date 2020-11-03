@@ -23,8 +23,6 @@ if __name__ == "__main__":
     audio_path = sys.argv[1]
     save_path = sys.argv[2]
     
-    utter_per_spkr = 50
-
     # load model
     pase = wf_builder('cfg/frontend/PASE+.cfg').eval()
     pase = pase.to(device)
@@ -32,9 +30,6 @@ if __name__ == "__main__":
 
     # get list of speaker ids from VoxCeleb
     speaker_ids = os.listdir(audio_path)
-    for speaker_id in speaker_ids:
-        if speaker_id.startswith('.'):
-            speaker_ids.remove(speaker_id)
 
     # get PASE representations for each speaker
     for speaker_id in tqdm(speaker_ids):
@@ -42,22 +37,19 @@ if __name__ == "__main__":
         path_to_speaker = os.path.join(audio_path, speaker_id)
         
         video_ids = os.listdir(path_to_speaker)
-        for video_id in video_ids:
-            if video_id.startswith('.'):
-                video_ids.remove(video_id)
-                continue
-        
+        utt_idx = 1
+        for video_id in sorted(video_ids):
             path_to_utters = os.path.join(path_to_speaker, video_id)
             utterances = os.listdir(path_to_utters)
-            for j, utt in enumerate(utterances):
-                if int(utt[:-4]) <= utters_per_spkr:
-                    utter_path = os.path.join(path_to_utters, utt)
-                    pase_reps = get_pase_representations(pase, utter_path)
-                     
-                    save_filename = utt[:-4]+'.npy'
-                    save_file_path = os.path.join(save_path, speaker_id, save_filename)
-                    np.save(save_file_path, pase_reps)
-
+            for utt in sorted(utterances):
+                save_filename = "%05d" % utt_idx + '.npy'
+                save_file_path = os.path.join(save_path, speaker_id, save_filename)
+                
+                utter_path = os.path.join(path_to_utters, utt)
+                utt_idx += 1
+                pase_reps = get_pase_representations(pase, utter_path)
+                
+                np.save(save_file_path, pase_reps)
 
 
 
