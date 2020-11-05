@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from train_tisv.hparam import hparam as hp
+from hparam import hparam as hp
 
 
 def get_centroids(embeddings):

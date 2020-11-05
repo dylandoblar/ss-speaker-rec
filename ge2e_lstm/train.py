@@ -134,7 +134,6 @@ def run():
         print('\nEpoch {}/{}'.format(epoch, num_epochs))
         print('-' * 10)
 
-        scheduler.step()
         model.train()
 
         # Training phase
@@ -175,6 +174,8 @@ def run():
                         time.ctime(), batch_id+1, len(train_dataset)//N,
                         loss, training_loss/(batch_id+1))
                 print(msg)
+
+        scheduler.step()
 
         # Print average training loss per batch
         print("\n  Average training loss per batch: {:.4f}".format(

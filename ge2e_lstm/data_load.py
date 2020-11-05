@@ -31,7 +31,8 @@ class VoxCelebDataset(Dataset):
 
         # randomly select M utterance files per speaker
         path_to_spkr_utts = os.path.join(self.data_path, selected_spkr)
-        sampled_utters = random.sample(path_to_spkr_utts, M)
+        utter_list = os.listdir(path_to_spkr_utts)
+        sampled_utters = random.sample(utter_list, self.M)
 
         # load in the M selected utterances
         # dims are ordered as (n_feats (n_mels or pase_dim), frames)
