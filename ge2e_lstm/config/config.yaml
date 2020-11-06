@@ -1,23 +1,24 @@
 ---
 data:
-    train_path: '/mnt/disks/data/filterbanks/voxceleb1'
-    test_path:  '/mnt/disks/data/filterbanks/voxceleb1_test'
+    train_path: '/mnt/disks/data/pase_representations/voxceleb1'
+    test_path:  '/mnt/disks/data/pase_representations/voxceleb1_test'
     fs: 16000          # sampling rate
     nfft: 512          # number of ffts for mel spectrogram preprocess
     window: 0.025      # 25ms
     hop: 0.01          # 10ms
-    nmels: 40          # Number of mel energies
+    nmels: 256          # Number of mel energies
 ---   
 model:
     hidden: 768        # number of LSTM hidden layer units
     num_layer: 3       # number of LSTM layers
     proj: 256          # embedding size
-    model_path: './checkpoints/checkpoint.model'  # model path for testing, inference, or resuming training
+    model_path: './checkpoints/voxceleb_36.model'  # model path for testing, inference, or resuming training
+    use_pase: !!bool "true"  # flag for using PASE features vs. filterbanks
 ---
 train:
     N : 32               # batch size (number of speakers per batch)
     M : 10               # number of utterances per speaker
-    num_frames: 160      # number of STFT frames to use per d-vector
+    num_frames: 147      # number of frames to use per d-vector
     num_workers: 4       # number of workers for dataloader
     lr: 0.01             # learning rate
     lr_step: 20          # step size for learning rate scheduler

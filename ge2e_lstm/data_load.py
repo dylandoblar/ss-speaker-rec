@@ -10,11 +10,12 @@ from torch.utils.data import Dataset
 
 
 class VoxCelebDataset(Dataset):
-    def __init__(self, data_path, M, num_frames, shuffle=True):
+    def __init__(self, data_path, M, num_frames, use_pase, shuffle=True):
         self.data_path = data_path
         self.M = M
         self.num_frames = num_frames
         self.file_list = os.listdir(self.data_path)
+        self.use_pase = use_pase
         self.shuffle = shuffle
 
     def __len__(self):
@@ -37,12 +38,20 @@ class VoxCelebDataset(Dataset):
         # load in the M selected utterances
         # dims are ordered as (n_feats (n_mels or pase_dim), frames)
         selected_utters = []
-        for full_utter in sampled_utters:
-            utter_spec = np.load(os.path.join(path_to_spkr_utts, full_utter))
-            start_frame = np.random.randint(0, utter_spec.shape[1]-self.num_frames)
-            partial_utt = utter_spec[:,start_frame:start_frame+self.num_frames]
-            selected_utters.append(partial_utt)
-        selected_utters = np.stack(selected_utters, axis=0)  # (batch, n_feats, frames)
+        if self.use_pase:
+            for full_utter in sampled_utters:
+                utter_spec = np.load(os.path.join(path_to_spkr_utts, full_utter))
+                start_frame = np.random.randint(0, utter_spec.shape[2]-self.num_frames)
+                partial_utt = utter_spec[:,:,start_frame:start_frame+self.num_frames]
+                selected_utters.append(partial_utt)
+            selected_utters = np.concatenate(selected_utters, axis=0)
+        else:
+            for full_utter in sampled_utters:
+                utter_spec = np.load(os.path.join(path_to_spkr_utts, full_utter))
+                start_frame = np.random.randint(0, utter_spec.shape[1]-self.num_frames)
+                partial_utt = utter_spec[:,start_frame:start_frame+self.num_frames]
+                selected_utters.append(partial_utt)
+            selected_utters = np.stack(selected_utters, axis=0)  # (batch, n_feats, frames)
 
         # transpose to (batch, frames, n_feats)
         selected_utters = torch.tensor(np.transpose(selected_utters, axes=(0,2,1)))

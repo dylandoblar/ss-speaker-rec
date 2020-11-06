@@ -12,9 +12,9 @@ from data_load import *
 from speech_embedder_net import *
 
 
-def get_dataloaders(N, M, num_frames):
-    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames)
-    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames)
+def get_dataloaders(N, M, num_frames, use_pase):
+    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames, use_pase)
+    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames, use_pase)
     
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=N, shuffle=True, num_workers=4, drop_last=True)
@@ -84,6 +84,9 @@ def get_lr(optimizer):
 
 
 def run():
+    # Check if using filterbanks or PASE features
+    use_pase = hp.model.use_pase
+
     # Hyperparameters
     num_epochs = hp.train.epochs
     N = hp.train.N    # batch size
@@ -113,7 +116,7 @@ def run():
         print("Training model from scratch.")
 
     # Initialize train and val data loaders
-    train_loader, val_loader, train_dataset, val_dataset = get_dataloaders(N, M, num_frames)
+    train_loader, val_loader, train_dataset, val_dataset = get_dataloaders(N, M, num_frames, use_pase)
     print("Data loaders initialized.")
 
     # Set up loss function and optimizer
