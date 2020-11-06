@@ -36,20 +36,21 @@ class VoxCelebDataset(Dataset):
         sampled_utters = random.sample(utter_list, self.M)
 
         # load in the M selected utterances
-        # dims are ordered as (n_feats (n_mels or pase_dim), frames)
+        # PASE features are ordered as (1, n_feats, frames)
+        # filterbanks are ordered as (n_mels, frames)
         selected_utters = []
         if self.use_pase:
             for full_utter in sampled_utters:
-                utter_spec = np.load(os.path.join(path_to_spkr_utts, full_utter))
-                start_frame = np.random.randint(0, utter_spec.shape[2]-self.num_frames)
-                partial_utt = utter_spec[:,:,start_frame:start_frame+self.num_frames]
+                utter_feats = np.load(os.path.join(path_to_spkr_utts, full_utter))
+                start_frame = np.random.randint(0, utter_feats.shape[2]-self.num_frames)
+                partial_utt = utter_feats[:,:,start_frame:start_frame+self.num_frames]
                 selected_utters.append(partial_utt)
             selected_utters = np.concatenate(selected_utters, axis=0)
         else:
             for full_utter in sampled_utters:
-                utter_spec = np.load(os.path.join(path_to_spkr_utts, full_utter))
-                start_frame = np.random.randint(0, utter_spec.shape[1]-self.num_frames)
-                partial_utt = utter_spec[:,start_frame:start_frame+self.num_frames]
+                utter_feats = np.load(os.path.join(path_to_spkr_utts, full_utter))
+                start_frame = np.random.randint(0, utter_feats.shape[1]-self.num_frames)
+                partial_utt = utter_feats[:,start_frame:start_frame+self.num_frames]
                 selected_utters.append(partial_utt)
             selected_utters = np.stack(selected_utters, axis=0)  # (batch, n_feats, frames)
 
