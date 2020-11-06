@@ -3,7 +3,7 @@
 
 import torch
 import torch.nn as nn
-import numpy
+import numpy as np
 import random
 import pdb
 import os
@@ -18,17 +18,17 @@ from config import *
 from torch.utils.data import Dataset, DataLoader
 from torchaudio import transforms
 from scipy import signal
-import numpy as np
 
 def worker_init_fn(worker_id):
-    numpy.random.seed(numpy.random.get_state()[1][0] + worker_id)
+    np.random.seed(np.random.get_state()[1][0] + worker_id)
 
 
-class PaseVoxCeleb(Dataset):
-    def __init__(self, dataset_file_name, max_frames, train_path):
+class VoxCelebExtracted(Dataset):
+    def __init__(self, dataset_file_name, train_path, max_frames, use_pase):
         self.dataset_file_name = dataset_file_name
-        self.max_frames = max_frames
         self.train_path = train_path
+        self.max_frames = max_frames
+        self.use_pase = use_pase
         self.data_dict = {}
         self.data_points = 0
 
@@ -58,17 +58,26 @@ class PaseVoxCeleb(Dataset):
         # randomly sample 2 utterances from current speaker for contrastive training
         selected_utters = random.sample(self.data_dict[selected_spkr], 2)
 
+        # load in the selected utterances
+        # PASE features are ordered as (1, n_feats, frames)
+        # filterbanks are ordered as (n_mels, frames)
         sampled_clips = []
-        for utt in selected_utters:
-            utt_pt = np.load(utt)
+        if self.use_pase:
+            for utt in selected_utters:
+                utter_feats = np.load(utt)
+                start_frame = random.randint(0, utter_feats.shape[2]-self.max_frames)
+                clip = utter_feats[:,:,start_frame:start_frame+self.max_frames]
+                sampled_clips.append(clip)
+            sampled_clips = np.concatenate(sampled_clips, axis=0)
+        else:
+            for utt in selected_utters:
+                utter_feats = np.load(utt)
+                start_frame = random.randint(0, utter_feats.shape[1]-self.max_frames)
+                clip = utter_feats[:,:,start_frame:start_frame+self.max_frames]
+                sampled_clips.append(clip)
+            sampled_clips = np.stack(sampled_clips, axis=0)
 
-            # process 1.8s segments, each pase embedding emulates sliding window of 10ms => 180 segments
-            utter_start = random.randint(0, utt_pt.shape[2]-self.max_frames)
-            clip = utt_pt[:,:,utter_start:utter_start+self.max_frames]
-            sampled_clips.append(clip)
-
-        sampled_clips = torch.tensor(np.concatenate(sampled_clips, axis=0))
-        return sampled_clips
+        return torch.tensor(sampled_clips)
 
 
 class wav_split(Dataset):
@@ -96,7 +105,7 @@ class wav_split(Dataset):
                 self.noiselist[file.split('/')[-4]] = []
             self.noiselist[file.split('/')[-4]].append(file)
 
-        self.rir = numpy.load('rir.npy')
+        self.rir = np.load('rir.npy')
 
         ### Read Training Files...
         with open(dataset_file_name) as dataset_file:
@@ -111,7 +120,7 @@ class wav_split(Dataset):
                 
     def __getitem__(self, index):
 
-        audio = loadWAVSplit(self.data_list[index], self.max_frames).astype(numpy.float)
+        audio = loadWAVSplit(self.data_list[index], self.max_frames).astype(np.float)
 
         augment_profiles = []
         audio_aug = []
@@ -119,7 +128,7 @@ class wav_split(Dataset):
         for ii in range(0,2):
 
             ## rir profile
-            rir_gains = numpy.random.uniform(SIGPRO_MIN_RANDGAIN,SIGPRO_MAX_RANDGAIN,1)
+            rir_gains = np.random.uniform(SIGPRO_MIN_RANDGAIN,SIGPRO_MAX_RANDGAIN,1)
             rir_filts = random.choice(self.rir)
 
             ## additive noise profile
@@ -144,7 +153,7 @@ class wav_split(Dataset):
         audio_aug.append(self.augment_wav(audio[0],augment_profiles[0]))
         audio_aug.append(self.augment_wav(audio[1],augment_profiles[1]))
 
-        audio_aug = numpy.concatenate(audio_aug,axis=0)
+        audio_aug = np.concatenate(audio_aug,axis=0)
 
         with torch.no_grad():
             feat = torch.FloatTensor(audio_aug)
@@ -164,23 +173,23 @@ class wav_split(Dataset):
 
         if augment['add_noise'] is not None:
 
-            noiseaudio  = loadWAV(augment['add_noise'], self.max_frames, evalmode=False).astype(numpy.float)
+            noiseaudio  = loadWAV(augment['add_noise'], self.max_frames, evalmode=False).astype(np.float)
 
-            noise_db = 10 * numpy.log10(numpy.mean(noiseaudio[0] ** 2)+1e-4) 
-            clean_db = 10 * numpy.log10(numpy.mean(audio ** 2)+1e-4) 
+            noise_db = 10 * np.log10(np.mean(noiseaudio[0] ** 2)+1e-4) 
+            clean_db = 10 * np.log10(np.mean(audio ** 2)+1e-4) 
 
-            noise = numpy.sqrt(10 ** ((clean_db - noise_db - augment['add_snr']) / 10)) * noiseaudio
+            noise = np.sqrt(10 ** ((clean_db - noise_db - augment['add_snr']) / 10)) * noiseaudio
             audio = audio + noise
 
         else:
 
-            audio = numpy.expand_dims(audio, 0)
+            audio = np.expand_dims(audio, 0)
 
         return audio
 
 def gen_echo(ref, rir, filterGain):
 
-    rir     = numpy.multiply(rir, pow(10, 0.1 * filterGain))    
+    rir     = np.multiply(rir, pow(10, 0.1 * filterGain))    
     echo    = signal.convolve(ref, rir, mode='full')[:len(ref)]   
     
     return echo
@@ -201,13 +210,13 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
 
     if audiosize <= max_audio:
         shortage    = math.floor( ( max_audio - audiosize + 1 ) / 2 )
-        audio       = numpy.pad(audio, (shortage, shortage), 'constant', constant_values=0)
+        audio       = np.pad(audio, (shortage, shortage), 'constant', constant_values=0)
         audiosize   = audio.shape[0]
 
     if evalmode:
-        startframe = numpy.linspace(0,audiosize-max_audio,num=num_eval)
+        startframe = np.linspace(0,audiosize-max_audio,num=num_eval)
     else:
-        startframe = numpy.array([numpy.int64(random.random()*(audiosize-max_audio))])
+        startframe = np.array([np.int64(random.random()*(audiosize-max_audio))])
     
     feats = []
     if evalmode and max_frames == 0:
@@ -216,7 +225,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
         for asf in startframe:
             feats.append(audio[int(asf):int(asf)+max_audio])
 
-    feat = numpy.stack(feats,axis=0)
+    feat = np.stack(feats,axis=0)
 
     return feat;
 
@@ -233,7 +242,7 @@ def loadWAVSplit(filename, max_frames):
 
     if audiosize <= max_audio:
         shortage    = math.floor( ( max_audio - audiosize + 1 ) / 2 )
-        audio       = numpy.pad(audio, (shortage, shortage), 'constant', constant_values=0)
+        audio       = np.pad(audio, (shortage, shortage), 'constant', constant_values=0)
         audiosize   = audio.shape[0]
 
 
@@ -242,17 +251,17 @@ def loadWAVSplit(filename, max_frames):
     startframe = random.sample(range(0, randsize), 2)
     startframe.sort()
     startframe[1] += max_audio
-    startframe = numpy.array(startframe)
+    startframe = np.array(startframe)
     assert randsize >= 1
     
     ## for more permutation
-    numpy.random.shuffle(startframe)
+    np.random.shuffle(startframe)
 
     feats = []
     for asf in startframe:
         feats.append(audio[int(asf):int(asf)+max_audio])
 
-    feat = numpy.stack(feats,axis=0)
+    feat = np.stack(feats,axis=0)
 
     return feat;
 
@@ -274,9 +283,9 @@ def get_data_loader(dataset_file_name, batch_size, max_frames, nDataLoaderThread
     return train_loader
 
 
-def get_pase_data_loader(dataset_file_name, max_frames, batch_size, nDataLoaderThread, train_path):
+def get_extracted_data_loader(dataset_file_name, max_frames, batch_size, nDataLoaderThread, train_path, use_pase):
 
-    train_dataset = PaseVoxCeleb(dataset_file_name, max_frames, train_path)
+    train_dataset = VoxCelebExtracted(dataset_file_name, train_path, max_frames, use_pase)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,

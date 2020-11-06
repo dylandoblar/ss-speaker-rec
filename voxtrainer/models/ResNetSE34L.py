@@ -9,14 +9,14 @@ from torch.nn import Parameter
 from models.ResNetBlocks import *
 
 class ResNetSE(nn.Module):
-    def __init__(self, block, layers, num_filters, nOut, encoder_type='SAP', n_mels=40, log_input=True, **kwargs):
+    def __init__(self, block, layers, num_filters, nOut, encoder_type='SAP', n_feats=40, log_input=True, **kwargs):
         super(ResNetSE, self).__init__()
 
         print('Embedding size is %d, encoder %s.'%(nOut, encoder_type))
         
         self.inplanes   = num_filters[0]
         self.encoder_type = encoder_type
-        self.n_mels     = n_mels
+        self.n_feats    = n_feats
         self.log_input  = log_input
 
         self.conv1 = nn.Conv2d(1, num_filters[0] , kernel_size=7, stride=(2, 1), padding=3,
@@ -34,8 +34,7 @@ class ResNetSE(nn.Module):
         if self.use_pase:
             self.instancenorm   = nn.InstanceNorm1d(self.pase_dim)
         else:
-            self.instancenorm   = nn.InstanceNorm1d(n_mels)
-        # self.torchfb        = torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_fft=512, win_length=400, hop_length=160, window_fn=torch.hamming_window, n_mels=n_mels)
+            self.instancenorm   = nn.InstanceNorm1d(n_feats)
 
         if self.encoder_type == "SAP":
             self.sap_linear = nn.Linear(num_filters[3] * block.expansion, num_filters[3] * block.expansion)

@@ -12,7 +12,7 @@ import datetime
 from tuneThreshold import tuneThresholdfromScore
 from SpeakerNet import SpeakerNet
 from SpeakerNetPase import SpeakerNetPase
-from DatasetLoader import get_data_loader, get_pase_data_loader
+from DatasetLoader import get_data_loader, get_extracted_data_loader
 
 parser = argparse.ArgumentParser(description = "SpeakerNet");
 
@@ -50,7 +50,7 @@ parser.add_argument('--test_path',      type=str,   default="voxceleb1", help='A
 parser.add_argument('--musan_path',     type=str,   default="musan_split", help='Absolute path to the test set');
 
 ## Model definition
-parser.add_argument('--n_mels',         type=int,   default=40,     help='Number of mel filterbanks');
+parser.add_argument('--n_feats',        type=int,   default=40,     help='Number of representation features (40 for mel filterbanks, 256 for PASE)');
 parser.add_argument('--log_input',      type=bool,  default=False,  help='Log input features')
 parser.add_argument('--model',          type=str,   default="",     help='Name of model definition');
 parser.add_argument('--encoder_type',   type=str,   default="SAP",  help='Type of encoder');
@@ -58,7 +58,6 @@ parser.add_argument('--nOut',           type=int,   default=512,    help='Embedd
 
 ## Args for using PASE features
 parser.add_argument('--use_pase',       type=bool,  default=False,  help='Whether training with PASE features or not');
-parser.add_argument('--pase_dim',       type=int,   default=256,    help='Dimension of PASE features')
 
 ## For test only
 parser.add_argument('--eval', dest='eval', action='store_true', help='Eval only')
@@ -158,10 +157,10 @@ f.close()
 scorefile = open(result_save_path+"/scores.txt", "a+");
 
 ## Initialise data loader
-if args.use_pase:
-    trainLoader = get_pase_data_loader(args.train_list, args.max_frames, args.batch_size, args.nDataLoaderThread, args.train_path)
-else:
-    trainLoader = get_data_loader(args.train_list, **vars(args));
+trainLoader = get_extracted_data_loader(args.train_list, args.max_frames,
+                                        args.batch_size, args.nDataLoaderThread,
+                                        args.train_path, args.use_pase)
+# trainLoader = get_data_loader(args.train_list, **vars(args));
 
 while(1):   
 
