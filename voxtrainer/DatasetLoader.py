@@ -73,7 +73,7 @@ class VoxCelebExtracted(Dataset):
             for utt in selected_utters:
                 utter_feats = np.load(utt)
                 start_frame = random.randint(0, utter_feats.shape[1]-self.max_frames)
-                clip = utter_feats[:,:,start_frame:start_frame+self.max_frames]
+                clip = utter_feats[:,start_frame:start_frame+self.max_frames]
                 sampled_clips.append(clip)
             sampled_clips = np.stack(sampled_clips, axis=0)
 

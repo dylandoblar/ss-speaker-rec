@@ -29,12 +29,7 @@ class ResNetSE(nn.Module):
         self.layer3 = self._make_layer(block, num_filters[2], layers[2], stride=(2, 2))
         self.layer4 = self._make_layer(block, num_filters[3], layers[3], stride=(1, 1))
 
-        self.use_pase = kwargs['use_pase']
-        self.pase_dim = kwargs['pase_dim']
-        if self.use_pase:
-            self.instancenorm   = nn.InstanceNorm1d(self.pase_dim)
-        else:
-            self.instancenorm   = nn.InstanceNorm1d(n_feats)
+        self.instancenorm   = nn.InstanceNorm1d(n_feats)
 
         if self.encoder_type == "SAP":
             self.sap_linear = nn.Linear(num_filters[3] * block.expansion, num_filters[3] * block.expansion)

@@ -9,10 +9,10 @@ import numpy, math, pdb, sys, random
 import time, os, itertools, shutil, importlib
 from tuneThreshold import tuneThresholdfromScore
 
-class SpeakerNetPase(nn.Module):
+class SpeakerNet(nn.Module):
 
     def __init__(self, model, optimizer, scheduler, trainfunc, **kwargs):
-        super(SpeakerNetPase, self).__init__();
+        super(SpeakerNet, self).__init__();
 
         SpeakerNetModel = importlib.import_module('models.'+model).__getattribute__('MainModel')
         self.__S__ = SpeakerNetModel(**kwargs).cuda();
@@ -28,7 +28,7 @@ class SpeakerNetPase(nn.Module):
 
         assert self.lr_step in ['epoch', 'iteration']
 
-        self.use_pase = use_pase
+        self.use_pase = kwargs['use_pase']
 		
 
     ## ===== ===== ===== ===== ===== ===== ===== =====
@@ -59,7 +59,7 @@ class SpeakerNetPase(nn.Module):
 
             feat = []
             for inp in data:
-                outp      = self.__S__.forward(torch.FloatTensor(inp).cuda())
+                outp      = self.__S__.forward(torch.FloatTensor(inp.float()).cuda())
                 feat.append(outp)
 
             feat = torch.stack(feat,dim=1).squeeze()

@@ -11,7 +11,6 @@ import zipfile
 import datetime
 from tuneThreshold import tuneThresholdfromScore
 from SpeakerNet import SpeakerNet
-from SpeakerNetPase import SpeakerNetPase
 from DatasetLoader import get_data_loader, get_extracted_data_loader
 
 parser = argparse.ArgumentParser(description = "SpeakerNet");
@@ -21,7 +20,7 @@ parser.add_argument('--config', type=str, default=None,  help='Config YAML file'
 ## Data loader
 parser.add_argument('--max_frames',     type=int,   default=180,    help='Input length to the network for training');
 parser.add_argument('--eval_frames',    type=int,   default=300,    help='Input length to the network for testing; 0 uses the whole files');
-parser.add_argument('--batch_size',     type=int,   default=200,    help='Batch size, number of speakers per batch');
+parser.add_argument('--batch_size',     type=int,   default=128,    help='Batch size, number of speakers per batch');
 parser.add_argument('--nDataLoaderThread', type=int, default=5,     help='Number of loader threads');
 
 ## Training details
@@ -29,13 +28,13 @@ parser.add_argument('--test_interval',  type=int,   default=5,      help='Test a
 parser.add_argument('--max_epoch',      type=int,   default=150,    help='Maximum number of epochs');
 parser.add_argument('--trainfunc',      type=str,   default="angleproto", help='Loss function');
 parser.add_argument('--augment_anchor', type=bool,  default=False,  help='Augment anchor as well as positive')
-parser.add_argument('--augment_type',   type=int,   default=2,      help='0: no augment, 1: noise only, 2: noise or RIR');
+parser.add_argument('--augment_type',   type=int,   default=0,      help='0: no augment, 1: noise only, 2: noise or RIR');
 
 ## Optimizer
 parser.add_argument('--optimizer',      type=str,   default="adam", help='sgd or adam');
 parser.add_argument('--scheduler',      type=str,   default="steplr", help='Learning rate scheduler');
 parser.add_argument('--lr',             type=float, default=0.001,  help='Learning rate');
-parser.add_argument("--lr_decay",       type=float, default=0.95,   help='Learning rate decay every [test_interval] epochs');
+parser.add_argument("--lr_decay",       type=float, default=0.97,   help='Learning rate decay every [test_interval] epochs');
 parser.add_argument('--weight_decay',   type=float, default=0,      help='Weight decay in the optimizer');
 
 ## Load and save
@@ -62,7 +61,7 @@ parser.add_argument('--use_pase',       type=bool,  default=False,  help='Whethe
 ## For test only
 parser.add_argument('--eval', dest='eval', action='store_true', help='Eval only')
 
-args = parser.parse_args();
+args = parser.parse_args()
 
 ## Parse YAML
 def find_option_type(key, parser):
@@ -91,11 +90,8 @@ if not(os.path.exists(model_save_path)):
 if not(os.path.exists(result_save_path)):
     os.makedirs(result_save_path)
 
-## Load models
-if args.use_pase:
-    s = SpeakerNetPase(**vars(args))
-else:
-    s = SpeakerNet(**vars(args));
+## Load model
+s = SpeakerNet(**vars(args));
 
 it          = 1;
 prevloss    = float("inf");
