@@ -134,7 +134,7 @@ class SpeakerNet(nn.Module):
                 feat = feat[:,start_idx:start_idx+eval_frames].unsqueeze(0).cuda()
 
             with torch.no_grad():
-                ref_feat = self.__S__.forward(feat).detach().cpu()
+                ref_feat = self.__S__.forward(feat.float()).detach().cpu()
 
             filename = '%06d.npy'%idx
 
