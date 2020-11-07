@@ -10,25 +10,27 @@ from torch.utils.data import Dataset
 
 
 class VoxCelebDataset(Dataset):
-    def __init__(self, data_path, M, num_frames, use_pase, shuffle=True):
+    def __init__(self, data_path, M, num_frames, use_pase, data_ratio=1.0, shuffle=True):
         self.data_path = data_path
         self.M = M
         self.num_frames = num_frames
-        self.file_list = os.listdir(self.data_path)
+        self.speaker_ids = sorted(os.listdir(self.data_path))
         self.use_pase = use_pase
+        self.data_ratio = data_ratio
         self.shuffle = shuffle
 
-    def __len__(self):
-        return len(self.file_list)
-
-    def __getitem__(self, idx):
-        self.file_list = os.listdir(self.data_path)
+        if self.data_ratio != 1.0:
+            end_idx = int(len(self.speaker_ids)*data_ratio)
+            self.speaker_ids = self.speaker_ids[:end_idx]
 
         if self.shuffle:
-            # select random speaker
-            selected_spkr = random.sample(self.file_list, 1)[0]
-        else:
-            selected_spkr = self.file_list[idx]
+            shuffle(self.speaker_ids)
+
+    def __len__(self):
+        return len(self.speaker_ids)
+
+    def __getitem__(self, idx):
+        selected_spkr = self.speaker_ids[idx]
 
         # randomly select M utterance files per speaker
         path_to_spkr_utts = os.path.join(self.data_path, selected_spkr)

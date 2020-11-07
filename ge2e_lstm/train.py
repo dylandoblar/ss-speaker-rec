@@ -12,14 +12,15 @@ from data_load import *
 from speech_embedder_net import *
 
 
-def get_dataloaders(N, M, num_frames, use_pase):
-    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames, use_pase)
-    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames, use_pase)
+def get_dataloaders(N, M, num_frames, use_pase, data_ratio):
+    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames, use_pase, data_ratio)
+    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames, use_pase, data_ratio)
     
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=N, shuffle=True, num_workers=4, drop_last=True)
+    # hardcoded in batch size of 40 for val_loader to cover all 40 VoxCeleb1 test speakers
     val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=N, shuffle=True, num_workers=4, drop_last=True)
+        val_dataset, batch_size=40, shuffle=True, num_workers=4, drop_last=True)
     
     return (train_loader, val_loader, train_dataset, val_dataset)
 
@@ -91,8 +92,8 @@ def run():
     num_epochs = hp.train.epochs
     N = hp.train.N    # batch size
     M = hp.train.M    # number of utterances per speaker
-    num_frames = hp.train.num_frames  # number of STFT frames to use per d-vector
-    
+    num_frames = hp.train.num_frames  # number of frames to use per d-vector
+
     lr = hp.train.lr  # learning rate
     lr_step = hp.train.lr_step  # step size for learning rate scheduler
     
@@ -116,7 +117,8 @@ def run():
         print("Training model from scratch.")
 
     # Initialize train and val data loaders
-    train_loader, val_loader, train_dataset, val_dataset = get_dataloaders(N, M, num_frames, use_pase)
+    data_ratio = hp.train.data_ratio  # ratio of training data to use for dataset size comparison
+    train_loader, val_loader, train_dataset, val_dataset = get_dataloaders(N, M, num_frames, use_pase, data_ratio)
     print("Data loaders initialized.")
 
     # Set up loss function and optimizer
