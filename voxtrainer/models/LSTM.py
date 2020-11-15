@@ -18,6 +18,7 @@ class LSTMEmbedder(nn.Module):
         self.projection = nn.Linear(hidden_size, out_size)
         
     def forward(self, x):
+        x = torch.transpose(x, 1, 2)
         x, _ = self.LSTM_stack(x.float()) #(batch, frames, n_mels)
         #only use last frame
         x = x[:,x.size(1)-1]
@@ -27,5 +28,5 @@ class LSTMEmbedder(nn.Module):
 
 def MainModel(nOut=256, **kwargs):
     # Number of filters
-    model = LSTMEmbedder(n_feats, out_size=nOut)
+    model = LSTMEmbedder(kwargs['n_feats'], out_size=nOut)
     return model
