@@ -13,14 +13,13 @@ from speech_embedder_net import *
 
 
 def get_dataloaders(N, M, num_frames, use_pase, data_ratio):
-    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames, use_pase, data_ratio)
-    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames, use_pase, data_ratio)
+    train_dataset = VoxCelebDataset(hp.data.train_path, M, num_frames, use_pase, data_ratio=data_ratio)
+    val_dataset = VoxCelebDataset(hp.data.test_path, M, num_frames, use_pase, data_ratio=1.0)
     
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=N, shuffle=True, num_workers=4, drop_last=True)
-    # hardcoded in batch size of 40 for val_loader to cover all 40 VoxCeleb1 test speakers
     val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=40, shuffle=True, num_workers=4, drop_last=True)
+        val_dataset, batch_size=N, shuffle=True, num_workers=4, drop_last=True)
     
     return (train_loader, val_loader, train_dataset, val_dataset)
 

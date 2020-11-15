@@ -10,21 +10,17 @@ from torch.utils.data import Dataset
 
 
 class VoxCelebDataset(Dataset):
-    def __init__(self, data_path, M, num_frames, use_pase, data_ratio=1.0, shuffle=True):
+    def __init__(self, data_path, M, num_frames, use_pase, data_ratio=1.0):
         self.data_path = data_path
         self.M = M
         self.num_frames = num_frames
         self.speaker_ids = sorted(os.listdir(self.data_path))
         self.use_pase = use_pase
         self.data_ratio = data_ratio
-        self.shuffle = shuffle
 
         if self.data_ratio != 1.0:
             end_idx = int(len(self.speaker_ids)*data_ratio)
             self.speaker_ids = self.speaker_ids[:end_idx]
-
-        if self.shuffle:
-            shuffle(self.speaker_ids)
 
     def __len__(self):
         return len(self.speaker_ids)
