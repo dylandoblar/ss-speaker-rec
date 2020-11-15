@@ -25,3 +25,7 @@ class LSTMEmbedder(nn.Module):
         x = x / torch.norm(x, dim=1).unsqueeze(1)
         return x
 
+def MainModel(nOut=256, **kwargs):
+    # Number of filters
+    model = LSTMEmbedder(n_feats, out_size=nOut)
+    return model
