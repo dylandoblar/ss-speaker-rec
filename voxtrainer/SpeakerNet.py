@@ -16,7 +16,7 @@ class SpeakerNet(nn.Module):
 
         SpeakerNetModel = importlib.import_module('models.'+model).__getattribute__('MainModel')
         self.__S__ = SpeakerNetModel(**kwargs).cuda();
-
+        
         LossFunction = importlib.import_module('loss.'+trainfunc).__getattribute__('LossFunction')
         self.__L__ = LossFunction(**kwargs).cuda();
 
@@ -29,7 +29,11 @@ class SpeakerNet(nn.Module):
         assert self.lr_step in ['epoch', 'iteration']
 
         self.use_pase = kwargs['use_pase']
-		
+        if model == 'LSTM':
+            self.use_lstm_encoder = True
+        else:
+            self.use_lstm_encoder = False
+
 
     ## ===== ===== ===== ===== ===== ===== ===== =====
     ## Train network
@@ -72,6 +76,11 @@ class SpeakerNet(nn.Module):
             index   += stepsize;
 
             nloss.backward();
+            
+            if self.use_lstm_encoder:
+                nn.utils.clip_grad_norm_(self.__S__.parameters(), 3.0)
+                nn.utils.clip_grad_norm_(self.__L__.parameters(), 1.0)
+            
             self.__optimizer__.step();
 
             telapsed = time.time() - tstart
