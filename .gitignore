@@ -2,3 +2,5 @@ tags
 checkpoints
 *.swp
 voxtrainer/plots
+__pycache__
+logs
