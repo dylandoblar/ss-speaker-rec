@@ -43,5 +43,5 @@ class VoxCelebClassificationDataset(Dataset):
         # features are the average representation in the window
         utt_rep = np.mean(partial_utt, axis=1)
 
-        return torch.tensor(utt_rep), label
+        return torch.as_tensor(utt_rep, dtype=torch.float), label
 

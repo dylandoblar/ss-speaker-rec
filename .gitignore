@@ -4,3 +4,4 @@ checkpoints
 voxtrainer/plots
 __pycache__
 logs
+plots

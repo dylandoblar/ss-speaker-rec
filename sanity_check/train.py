@@ -19,16 +19,19 @@ from models import LinearNet, OneHiddenLayerReluNet
 def main():
     ''' Train a linear model for k-way classification on all speakers '''
 
-    data_path = '/mnt/disks/data/pase_representations'
+    # data_path = '/mnt/disks/data/pase_representations'
+    data_path = '/mnt/disks/data/filterbanks'
     log_dir = '/home/dylan/ss-speaker-rec/sanity_check/logs'
-    # data_path = '/mnt/disks/data/filterbanks'
     use_pase = 'pase' in data_path
     num_frames = 167 if use_pase else 180
     batch_size = 256 # 128 # 64 #  512
     num_epochs = 100
-    lr = 5e-3
+    lr = 5e-2
     num_workers = 5 # num workers for the dataloaders
-    exp_name = f"exp_{'pase' if use_pase else 'fbank'}_frames-{num_frames}_bs-{batch_size}_lr-{lr}_ep-{num_epochs}"
+    # linear model vs one-hidden-layer
+    model_type = 'linear'  # 'hidden'
+    exp_name = f"exp_mod-{model_type}_feats-{'pase' if use_pase else 'fbank'}_frames-{num_frames}_bs-{batch_size}_lr-{lr}_ep-{num_epochs}"
+    print(f"exp_name : {exp_name}")
 
     full_dataset = VoxCelebClassificationDataset(data_path, num_frames, use_pase)
 
@@ -79,7 +82,12 @@ def main():
     print(f"device : {device}")
     print(f"torch.cuda.get_device_name(0) : {torch.cuda.get_device_name(0)}")
 
-    model = LinearNet(num_feature=full_dataset[0][0].size()[0], num_class=len(full_dataset.speaker_ids))
+    num_feature = full_dataset[0][0].size()[0]
+    num_class = len(full_dataset.speaker_ids)
+    if model_type == 'linear':
+        model = LinearNet(num_feature=num_feature, num_class=num_class)
+    elif model_type == 'hidden':
+        model = OneHidddenLayerReluNet(num_feature=num_feature, num_class=num_class)
 
     model.to(device)
 
