@@ -12,7 +12,7 @@ model:
     hidden: 768        # number of LSTM hidden layer units
     num_layer: 3       # number of LSTM layers
     proj: 256          # embedding size
-    model_path: './checkpoints/voxceleb_36.model'  # model path for testing, inference, or resuming training
+    model_path: './checkpoints/'  # model path for testing, inference, or resuming training
     use_pase: !!bool "true"  # flag for using PASE features vs. filterbanks
 ---
 train:
@@ -22,9 +22,9 @@ train:
     num_workers: 4       # number of workers for dataloader
     lr: 0.01             # learning rate
     lr_step: 20          # step size for learning rate scheduler
-    epochs: 200          # maximum number of training epochs
-    output_interval: 10  # batch output interval every epoch
+    epochs: 300          # maximum number of training epochs
+    output_interval: 2  # batch output interval every epoch
     checkpoint_interval: 10  # interval for saving model parameters
-    checkpoint_dir: './checkpoints'
+    checkpoint_dir: './ckpt_pase_10'
     restore: !!bool "false"  # resume training from previous model path
-    data_ratio: 1.0      # proportion of training data to use (for dataset size studies)
+    data_ratio: 0.1      # proportion of training data to use (for dataset size studies)
