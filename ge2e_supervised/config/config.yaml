@@ -27,4 +27,4 @@ train:
     checkpoint_interval: 10  # interval for saving model parameters
     checkpoint_dir: './ckpt_pase_10'
     restore: !!bool "false"  # resume training from previous model path
-    data_ratio: 0.1      # proportion of training data to use (for dataset size studies)
+    data_ratio: 1.0      # proportion of training data to use (for dataset size studies)
