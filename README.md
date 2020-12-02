@@ -1,8 +1,9 @@
 # Multi-task Learning of Speech Representations for Speaker Recognition
 
 This repository contains code for a class project for MIT's Meta Learning
-class (6.883), Fall 2020. We compare the effectiveness of learned
-representations from the
+class (6.883), Fall 2020.
+
+We compare the effectiveness of learned representations from the
 [problem-agnostic speech encoder (PASE+)](https://arxiv.org/abs/2001.09239)
 with log-mel filterbanks when used for the task of speaker recognition.
 Specifically, we use the two types of features as as inputs to various
