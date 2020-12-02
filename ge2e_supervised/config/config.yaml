@@ -6,7 +6,7 @@ data:
     nfft: 512          # number of ffts for mel spectrogram preprocess
     window: 0.025      # 25ms
     hop: 0.01          # 10ms
-    nmels: 256          # Number of mel energies
+    nfeats: 256        # dimension of input features (40 for mel filterbanks, 256 for PASE+)
 ---   
 model:
     hidden: 768        # number of LSTM hidden layer units
