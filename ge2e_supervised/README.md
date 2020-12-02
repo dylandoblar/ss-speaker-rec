@@ -2,11 +2,11 @@
 
 PyTorch implementation of speaker ID embedding model and loss function described
 in https://arxiv.org/pdf/1710.10467.pdf. Based on the code in
-https://github.com/HarryVolek/PyTorch_Speaker_Verification
+https://github.com/HarryVolek/PyTorch_Speaker_Verification.
 
 This repository contains code to preprocess data and train the model. 
-This particular codebase is designed for use with the VoxCeleb1 dataset
-(http://www.robots.ox.ac.uk/~vgg/data/voxceleb/).
+This particular codebase is designed for use with the
+[VoxCeleb1 dataset](http://www.robots.ox.ac.uk/~vgg/data/voxceleb/).
 
 
 ## Data preprocessing

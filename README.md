@@ -11,9 +11,7 @@ speaker embedding models and compare the resulting performance.
 
 ## Baseline code
 
-The baseline code for the [`pase`](https://github.com/dylandoblar/ss-speaker-rec/tree/main/pase),
-[`ge2e_supervised`](https://github.com/dylandoblar/ss-speaker-rec/tree/main/ge2e_supervised), and
-[`self_supervised`](https://github.com/dylandoblar/ss-speaker-rec/tree/main/self_supervised)
+The baseline code for the `pase`, `ge2e_supervised`, and `self_supervised`
 directories is from the [`pase`](https://github.com/santi-pdp/pase),
 [`PyTorch_Speaker_Verification`](https://github.com/HarryVolek/PyTorch_Speaker_Verification), and
 [`voxceleb_unsupervised`](https://github.com/joonson/voxceleb_unsupervised)
@@ -31,9 +29,9 @@ data preparation instructions in the
 from Clova AI.
 
 To preprocess data by pre-extracting log-mel filterbanks or PASE+ features,
-run [`ge2e_supervised/extract_filterbanks`] or [`pase/extract_pase_features`],
-respectively. These scripts will save features in npy format in the specified
-output directory.
+run `ge2e_supervised/extract_filterbanks` or `pase/extract_pase_features`,
+respectively. These scripts will save features in as numpy arrays in the
+specified output directory.
 
 Voice activity detection (VAD) can optionally be done as part of extraction
 (using methods such as Google's WebRTCVAD, for example), but we do not do so
