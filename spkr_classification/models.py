@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+
 class LinearNet(nn.Module):
     def __init__(self, num_feature, num_class):
         super(LinearNet, self).__init__()
@@ -14,6 +15,7 @@ class LinearNet(nn.Module):
         x = self.layer_out(x)
 
         return x
+
 
 class OneHiddenLayerReluNet(nn.Module):
     def __init__(self, num_feature, num_class):
@@ -31,4 +33,3 @@ class OneHiddenLayerReluNet(nn.Module):
         x = self.layer_out(x)
 
         return x
-

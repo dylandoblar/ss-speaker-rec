@@ -24,13 +24,14 @@ def main():
     log_dir = '/home/dylan/ss-speaker-rec/sanity_check/logs'
     use_pase = 'pase' in data_path
     num_frames = 167 if use_pase else 180
-    batch_size = 256 # 128 # 64 #  512
+    batch_size = 256  # 128 # 64 #  512
     num_epochs = 100
     lr = 5e-2
-    num_workers = 5 # num workers for the dataloaders
+    num_workers = 5  # num workers for the dataloaders
     # linear model vs one-hidden-layer
     model_type = 'linear'  # 'hidden'
-    exp_name = f"exp_mod-{model_type}_feats-{'pase' if use_pase else 'fbank'}_frames-{num_frames}_bs-{batch_size}_lr-{lr}_ep-{num_epochs}"
+    exp_name = f"exp_mod-{model_type}_feats-{'pase' if use_pase else 'fbank'}_frames-{num_frames\
+        }_bs-{batch_size}_lr-{lr}_ep-{num_epochs}"
     print(f"exp_name : {exp_name}")
 
     full_dataset = VoxCelebClassificationDataset(data_path, num_frames, use_pase)
@@ -52,7 +53,6 @@ def main():
             # generator=torch.Generator().manual_seed(42)
         )
 
-
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=batch_size,
@@ -66,7 +66,7 @@ def main():
         drop_last=True
     )
 
-    if False: # profile dataloader speed
+    if False:  # profile dataloader speed
         start_time = time.time()
         for batch_idx, (Xs, ys) in enumerate(train_loader):
             if batch_idx == 4:
@@ -87,7 +87,7 @@ def main():
     if model_type == 'linear':
         model = LinearNet(num_feature=num_feature, num_class=num_class)
     elif model_type == 'hidden':
-        model = OneHidddenLayerReluNet(num_feature=num_feature, num_class=num_class)
+        model = OneHiddenLayerReluNet(num_feature=num_feature, num_class=num_class)
 
     model.to(device)
 
@@ -108,7 +108,6 @@ def main():
     with open(os.path.join(log_dir, exp_name+'.csv'), 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['train_acc', 'val_acc', 'train_loss', 'val_loss'])
-
 
     print("Begin training.")
     for e in tqdm(range(1, num_epochs+1)):
@@ -133,8 +132,7 @@ def main():
             train_epoch_loss += train_loss.item()
             train_epoch_acc += train_acc.item()
 
-
-        # VALIDATION    
+        # VALIDATION
         with torch.no_grad():
 
             val_epoch_loss = 0
@@ -166,12 +164,14 @@ def main():
                 val_epoch_loss/len(val_loader),
             ])
 
-        print(f'Epoch {e+0:03}: | Train Loss: {train_epoch_loss/len(train_loader):.5f} | Val Loss: {val_epoch_loss/len(val_loader):.5f} | Train Acc: {train_epoch_acc/len(train_loader):.3f}| Val Acc: {val_epoch_acc/len(val_loader):.3f}')
+        print(f'Epoch {e+0:03}: | Train Loss: {train_epoch_loss/len(train_loader):.5f} | Val Loss: \
+              {val_epoch_loss/len(val_loader):.5f} | Train Acc: {train_epoch_acc/ \
+              len(train_loader):.3f}| Val Acc: {val_epoch_acc/len(val_loader):.3f}')
 
 
 def multi_acc(y_pred, y_test):
-    y_pred_softmax = torch.log_softmax(y_pred, dim = 1)
-    _, y_pred_tags = torch.max(y_pred_softmax, dim = 1)
+    y_pred_softmax = torch.log_softmax(y_pred, dim=1)
+    _, y_pred_tags = torch.max(y_pred_softmax, dim=1)
 
     correct_pred = (y_pred_tags == y_test).float()
     acc = correct_pred.sum() / len(correct_pred)

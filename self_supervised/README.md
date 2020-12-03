@@ -1,7 +1,7 @@
 ## Unsupervised VoxCeleb trainer
 
 This repository is based on the [`voxceleb_unsupervised`](https://github.com/joonson/voxceleb_unsupervised)
-repository for self-supervised speaker verification
+repository for self-supervised speaker verification.
 
 
 #### Dependencies
