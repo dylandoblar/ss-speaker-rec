@@ -29,10 +29,45 @@ data preparation instructions in the
 [`voxceleb_trainer`](https://github.com/clovaai/voxceleb_trainer) repository
 from Clova AI.
 
-To preprocess data by pre-extracting log-mel filterbanks or PASE+ features,
-run `ge2e_supervised/extract_filterbanks` or `pase/extract_pase_features`,
-respectively. These scripts will save features in as numpy arrays in the
-specified output directory.
+All data loaders depend on having pre-extracted features (log-mel filterbanks
+or PASE+ features). To preprocess data in this way, run
+`ge2e_supervised/extract_filterbanks` or `pase/extract_pase_features`,
+respectively.
+
+To run these scripts, the data must be organized in the following
+directory structure:
+
+```
+/voxceleb1_wav/speaker_id/utterance_id.wav
+```
+
+For example, running
+
+```
+python3 extract_filterbanks.py voxceleb1_wav voxceleb1_fbank
+```
+
+will process the utterances in voxceleb1_wav and save npy files in the
+following structure:
+
+```
+/voxceleb1_fbank/speaker_id/00001.npy
+/voxceleb1_fbank/speaker_id/00002.npy
+...
+```
+
+Likewise, running
+```
+python3 extract_pase_features.py voxceleb1_wav voxceleb1_pase
+```
+
+will save npy files in the following directory structure:
+
+```
+/voxceleb1_pase/speaker_id/00001.npy
+/voxceleb1_pase/speaker_id/00002.npy
+...
+```
 
 Voice activity detection (VAD) can optionally be done as part of extraction
 (using methods such as Google's WebRTCVAD, for example), but we do not do so
@@ -42,5 +77,5 @@ because we assume that utterances in VoxCeleb1 consist of mostly speech.
 ## Experiments
 
 Refer to the READMEs of each of the subdirectories for more details on how to
-preprocess data or run experiments with various settings.
+run experiments with various settings.
 

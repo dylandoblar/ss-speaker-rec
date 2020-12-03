@@ -9,34 +9,6 @@ This particular codebase is designed for use with the
 [VoxCeleb1 dataset](http://www.robots.ox.ac.uk/~vgg/data/voxceleb/).
 
 
-## Data preprocessing
-
-Any dataset must be organized in the following directory structure to be
-preprocessed:
-
-```
-/base_directory/speaker_id/utterance_id
-```
-
-For each speaker ID, running `extract_filterbanks` computes the
-log-mel filterbanks for all audio utterances in the base directory and
-saves them in npy format in the specified output directory.
-For example, running
-
-```
-python3 extract_filterbanks.py voxceleb1_dev_wav voxceleb1_dev_npy
-```
-
-will process the utterances in voxceleb11_dev_wav and save npy files in the
-following structure:
-
-```
-/voxceleb1_dev_npy/speaker_id/00001.npy
-/voxceleb1_dev_npy/speaker_id/00002.npy
-...
-```
-
-
 ## Training
 
 The training pipeline is based heavily on the code by Harry Volek in
