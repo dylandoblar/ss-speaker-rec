@@ -16,9 +16,8 @@ To train the speaker embedding model, run `train.py`.
 The checkpoint save location, save interval, and hyperparameters such as
 batch size can be controlled under the `train` header in
 `config/config.yaml`. When training on different types of input features,
-the `nfeats` parameter under the `data` header in the config file
-must change to match the dimension of the feature (e.g. 40 for filterbanks,
-256 for PASE+ features).
+the `nfeats` parameter under the `data` header must change to match the
+dimension of the feature (e.g. 40 for filterbanks, 256 for PASE+ features).
 
 To train the model using different percentages of the dataset (measured
 in terms of number of unique speakers), change the `data_ratio` parameter
