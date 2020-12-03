@@ -31,14 +31,14 @@ from Clova AI.
 
 All data loaders depend on having pre-extracted features (log-mel filterbanks
 or PASE+ features). To preprocess data in this way, run
-`ge2e_supervised/extract_filterbanks` or `pase/extract_pase_features`,
+`ge2e_supervised/extract_filterbanks.py` or `pase/extract_pase_features.py`,
 respectively.
 
 To run these scripts, the data must be organized in the following
 directory structure:
 
 ```
-/voxceleb1_wav/speaker_id/utterance_id.wav
+voxceleb1_wav/speaker_id/utterance_id.wav
 ```
 
 For example, running
@@ -51,8 +51,8 @@ will process the utterances in voxceleb1_wav and save npy files in the
 following structure:
 
 ```
-/voxceleb1_fbank/speaker_id/00001.npy
-/voxceleb1_fbank/speaker_id/00002.npy
+voxceleb1_fbank/speaker_id/00001.npy
+voxceleb1_fbank/speaker_id/00002.npy
 ...
 ```
 
@@ -64,8 +64,8 @@ python3 extract_pase_features.py voxceleb1_wav voxceleb1_pase
 will save npy files in the following directory structure:
 
 ```
-/voxceleb1_pase/speaker_id/00001.npy
-/voxceleb1_pase/speaker_id/00002.npy
+voxceleb1_pase/speaker_id/00001.npy
+voxceleb1_pase/speaker_id/00002.npy
 ...
 ```
 
@@ -76,6 +76,6 @@ because we assume that utterances in VoxCeleb1 consist of mostly speech.
 
 ## Experiments
 
-Refer to the READMEs of each of the subdirectories for more details on how to
+Please refer to the READMEs of each of the subdirectories for more details on how to
 run experiments with various settings.
 

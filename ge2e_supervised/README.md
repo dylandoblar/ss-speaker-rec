@@ -11,9 +11,6 @@ This particular codebase is designed for use with the
 
 ## Training
 
-The training pipeline is based heavily on the code by Harry Volek in
-https://github.com/HarryVolek/PyTorch_Speaker_Verification.
-
 To train the speaker embedding model, run `train.py`.
 
 The checkpoint save location, save interval, and hyperparameters such as
